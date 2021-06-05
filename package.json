@@ -1,0 +1,19 @@
+{
+  "name": "chat-socket",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+	"serve": "node dist/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^15.12.1",
+    "@types/ws": "^7.4.4"
+  },
+  "dependencies": {
+    "nodb": "github:wdjty326/noDB",
+    "ws": "^7.4.6"
+  }
+}
