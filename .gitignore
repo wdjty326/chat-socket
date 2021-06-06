@@ -1,2 +1,12 @@
 node_modules
+
+## package
 package-lock.json
+
+
+## upload directory
+dist/upload
+
+## test.html
+test.html
+test2.html
