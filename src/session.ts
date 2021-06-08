@@ -1,6 +1,9 @@
 import ws from "ws";
+import { MAXIMUM_CHAT_COUNT } from "./const";
+import { WSType } from "./interface";
 
 export class wsSession {
+	private readonly chats: Array<[WSType, number, string, string]> = [];
 	private readonly list: Array<[number, string, ws]> = [];
 	private static instance: wsSession | null = null;
 
@@ -24,7 +27,13 @@ export class wsSession {
 		return [...this.list];
 	}
 
-	public broadcast(idx: number, name: string, message: string) {
-		this.list.forEach((session) => session[2].send(JSON.stringify({ idx, name, message })));
+	public getChats () {
+		return [...this.chats];
+	}
+
+	public broadcast(type: WSType, idx: number, name: string, message: string) {
+		this.list.forEach((session) => session[2].send(JSON.stringify({ type, idx, name, message })));
+		this.chats.push([type, idx, name, message]);
+		if (this.chats.length > MAXIMUM_CHAT_COUNT) this.chats.splice(0, 1);
 	}
 }

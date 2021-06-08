@@ -9,12 +9,41 @@ var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var function_1 = require("./function");
 var const_1 = require("./const");
+var session_1 = require("./session");
 var db = nodb_1.default.getInstance();
 var getAction = function (req, res) {
     var pathname = req.url;
     var search = pathname.substr(pathname.indexOf("?") + 1);
     var params = function_1.getParameter(search);
-    if (pathname.startsWith("/blocklist")) {
+    if (pathname.startsWith("/upload/")) {
+        var filePath = pathname.substr(8, pathname.indexOf("?") > -1 ? pathname.indexOf("?") : pathname.length);
+        var extension = pathname.substr(filePath.lastIndexOf(".")).toLowerCase();
+        var contentType = "image/jpeg";
+        switch (extension) {
+            case "gif":
+                contentType = "image/gif";
+                break;
+            case "png":
+                contentType = "image/png";
+                break;
+        }
+        res.writeHead(200, {
+            "Content-Type": contentType,
+        });
+        res.write(fs_1.default.readFileSync(path_1.default.resolve(const_1.UPLOAD_FILE_PATH, filePath), {
+            flag: "r"
+        }));
+        res.end();
+    }
+    else if (pathname.startsWith("/chatlist")) {
+        res.write(JSON.stringify(session_1.wsSession.getInstance().getChats().map(function (data) { return ({ type: data[0], idx: data[1], name: data[2], message: data[3] }); })));
+        res.end();
+    }
+    else if (pathname.startsWith("/userlist")) {
+        res.write(JSON.stringify(session_1.wsSession.getInstance().get().map(function (data) { return ({ idx: data[0], name: data[1] }); })));
+        res.end();
+    }
+    else if (pathname.startsWith("/blocklist")) {
         var idx_1 = params.idx;
         if (typeof idx_1 !== "string" || isNaN(parseInt(idx_1.toString(), 10)))
             throw new Error("Typeof Exception::idx");
@@ -69,9 +98,17 @@ var getAction = function (req, res) {
     ;
 };
 exports.getAction = getAction;
-var postAction = function (req, res, body) {
+var postAction = function (req, res, raw) {
     var pathname = req.url;
-    var params = function_1.postParameter(body);
+    var body = raw.toString();
+    var contentType = req.headers["content-type"] || "";
+    if (!contentType.startsWith("multipart/form-data")) {
+        res.write(JSON.stringify({
+            error: "Content-Type::Multipart/form-data",
+        }));
+        return res.end();
+    }
+    var params = function_1.postParameter(body, raw);
     if (pathname.startsWith("/upload") && typeof params.file === "object") {
         var file = params.file;
         var filename = Date.now() + "_" + file.filename;
@@ -81,6 +118,7 @@ var postAction = function (req, res, body) {
         res.write(JSON.stringify({
             upload: const_1.UPLOAD_DIRECTORY + "/" + filename,
         }));
+        res.end();
     }
     else {
         res.writeHead(404);

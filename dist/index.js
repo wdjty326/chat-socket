@@ -11,6 +11,7 @@ var nodb_1 = __importDefault(require("nodb"));
 var session_1 = require("./session");
 var action_1 = require("./action");
 var const_1 = require("./const");
+var interface_1 = require("./interface");
 if (!fs_1.default.existsSync(const_1.UPLOAD_FILE_PATH))
     fs_1.default.mkdirSync(const_1.UPLOAD_FILE_PATH);
 var db = nodb_1.default.getInstance();
@@ -43,8 +44,9 @@ var server = http_1.default.createServer(function (req, res) {
                 chunks_1.push(data);
             });
             req.on("end", function () {
-                var body = chunks_1.map(function (chunk) { return chunk.toString("utf8"); }).join("");
-                action_1.postAction(req, res, body);
+                var raw = Buffer.concat(chunks_1);
+                // const body = raw.toString("binary"); // Buffer.from(Buffer.concat(chunks), "utf8");
+                action_1.postAction(req, res, raw);
             });
         }
     }
@@ -79,8 +81,11 @@ websocket.on("connection", function (socket, request) {
         try {
             var send = JSON.parse(msg.toString());
             switch (send.event) {
-                case "message":
-                    instance.broadcast(idx, data[2], send.message);
+                case interface_1.WSType.Message:
+                    instance.broadcast(interface_1.WSType.Message, idx, data[2], send.message);
+                    break;
+                default:
+                    instance.broadcast(send.event, idx, data[2], "");
                     break;
             }
         }
@@ -90,10 +95,10 @@ websocket.on("connection", function (socket, request) {
     });
     socket.on("close", function () {
         instance.delete(idx);
-        instance.broadcast(idx, data[2], data[2] + "\uB2D8\uAED8\uC11C \uD1F4\uC7A5\uD558\uC168\uC2B5\uB2C8\uB2E4.");
+        instance.broadcast(interface_1.WSType.Close, idx, data[2], data[2] + "\uB2D8\uAED8\uC11C \uD1F4\uC7A5\uD558\uC168\uC2B5\uB2C8\uB2E4.");
     });
     instance.push([idx, data[2], socket]);
-    instance.broadcast(idx, data[2], data[2] + "\uB2D8\uAED8\uC11C \uC785\uC7A5\uD558\uC168\uC2B5\uB2C8\uB2E4.");
+    instance.broadcast(interface_1.WSType.Open, idx, data[2], data[2] + "\uB2D8\uAED8\uC11C \uC785\uC7A5\uD558\uC168\uC2B5\uB2C8\uB2E4.");
 });
 websocket.on("listening", function () {
     console.log("websocket listening 8444");

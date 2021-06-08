@@ -6,6 +6,7 @@ import path from "path";
 import { getParameter, postParameter } from "./function";
 import { Block } from "./interface";
 import { UPLOAD_DIRECTORY, UPLOAD_FILE_PATH } from "./const";
+import { wsSession } from "./session";
 
 const db = nodb.getInstance();
 
@@ -14,7 +15,35 @@ export const getAction: http.RequestListener = (req, res) => {
 	const search = pathname.substr(pathname.indexOf("?") + 1)
 	const params = getParameter(search);
 
-	if (pathname.startsWith("/blocklist")) {
+	if (pathname.startsWith("/upload/")) {
+		const filePath = pathname.substr(8, pathname.indexOf("?") > -1 ? pathname.indexOf("?") : pathname.length);
+		const extension = pathname.substr(filePath.lastIndexOf(".")).toLowerCase();
+		let contentType = "image/jpeg";
+		switch (extension) {
+			case "gif":
+				contentType = "image/gif";
+				break;
+			case "png":
+				contentType = "image/png";
+				break;
+		}
+		res.writeHead(200, {
+			"Content-Type": contentType,
+		});
+		res.write(fs.readFileSync(path.resolve(UPLOAD_FILE_PATH, filePath), {
+			flag: "r"
+		}));
+		res.end();
+	}
+	else if (pathname.startsWith("/chatlist")) {
+		res.write(JSON.stringify(wsSession.getInstance().getChats().map((data) => ({  type: data[0], idx: data[1], name: data[2], message: data[3] }))));
+		res.end();
+	}
+	else if (pathname.startsWith("/userlist")) {
+		res.write(JSON.stringify(wsSession.getInstance().get().map((data) => ({ idx: data[0], name: data[1] }))));
+		res.end();
+	}
+	else if (pathname.startsWith("/blocklist")) {
 		const { idx } = params;
 
 		if (typeof idx !== "string" || isNaN(parseInt(idx.toString(), 10)))
@@ -71,9 +100,19 @@ export const getAction: http.RequestListener = (req, res) => {
 	};
 };
 
-export const postAction = (req: IncomingMessage, res: ServerResponse, body: string): void => {
+export const postAction = (req: IncomingMessage, res: ServerResponse, raw: Buffer): void => {
 	const pathname = req.url!;
-	const params = postParameter(body);
+	const body = raw.toString();
+
+	const contentType = req.headers["content-type"] || "";
+	if (!contentType.startsWith("multipart/form-data")) {
+		res.write(JSON.stringify({
+			error: "Content-Type::Multipart/form-data",
+		}));
+		return res.end();
+	}
+
+	const params = postParameter(body, raw);
 
 	if (pathname.startsWith("/upload") && typeof params.file === "object") {
 		const file = params.file;
@@ -84,6 +123,7 @@ export const postAction = (req: IncomingMessage, res: ServerResponse, body: stri
 		res.write(JSON.stringify({
 			upload: `${UPLOAD_DIRECTORY}/${filename}`,
 		}));
+		res.end();
 	}
 	else {
 		res.writeHead(404);

@@ -7,3 +7,11 @@ export interface Block {
 	target: number;
 	timestamp?: number;
 }
+
+export enum WSType {
+	Open = "open",
+	Writing = "writing",
+	Message = "message",
+	UnWriting = "unwriting",
+	Close = "close",
+}

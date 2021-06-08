@@ -6,8 +6,10 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.wsSession = void 0;
+var const_1 = require("./const");
 var wsSession = /** @class */ (function () {
     function wsSession() {
+        this.chats = [];
         this.list = [];
     }
     wsSession.getInstance = function () {
@@ -26,8 +28,14 @@ var wsSession = /** @class */ (function () {
     wsSession.prototype.get = function () {
         return __spreadArray([], this.list);
     };
-    wsSession.prototype.broadcast = function (idx, name, message) {
-        this.list.forEach(function (session) { return session[2].send(JSON.stringify({ idx: idx, name: name, message: message })); });
+    wsSession.prototype.getChats = function () {
+        return __spreadArray([], this.chats);
+    };
+    wsSession.prototype.broadcast = function (type, idx, name, message) {
+        this.list.forEach(function (session) { return session[2].send(JSON.stringify({ type: type, idx: idx, name: name, message: message })); });
+        this.chats.push([type, idx, name, message]);
+        if (this.chats.length > const_1.MAXIMUM_CHAT_COUNT)
+            this.chats.splice(0, 1);
     };
     wsSession.instance = null;
     return wsSession;

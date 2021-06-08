@@ -7,6 +7,7 @@ import nodb from "nodb";
 import { wsSession } from "./session";
 import { getAction, postAction } from "./action";
 import { UPLOAD_FILE_PATH } from "./const";
+import { WSType } from "./interface";
 
 if (!fs.existsSync(UPLOAD_FILE_PATH)) fs.mkdirSync(UPLOAD_FILE_PATH);
 
@@ -37,13 +38,14 @@ const server = http.createServer((req, res) => {
 	try {
 		if (req.method === "GET") return getAction(req, res);
 		else if (req.method === "POST") {
-			const chunks: BlobPart[] = [];
+			const chunks: Buffer[] = [];
 			req.on("data", (data) => {
 				chunks.push(data);
 			});
 			req.on("end", () => {
-				const body = chunks.map((chunk) => (chunk as Buffer).toString("utf8")).join("");
-				postAction(req, res, body);
+				const raw = Buffer.concat(chunks);
+				// const body = raw.toString("binary"); // Buffer.from(Buffer.concat(chunks), "utf8");
+				postAction(req, res, raw);
 			});
 		}
 	} catch (e) {
@@ -63,7 +65,7 @@ server.listen("8443");
 //-----------------------------------
 
 interface wsData {
-	event: "open" | "message" | "close";
+	event: WSType;
 	message: string;
 }
 
@@ -87,9 +89,12 @@ websocket.on("connection", (socket, request) => {
 		try {
 			let send: wsData = JSON.parse(msg.toString());
 			switch (send.event) {
-				case "message":
-					instance.broadcast(idx, data[2], send.message);
+				case WSType.Message:
+					instance.broadcast(WSType.Message, idx, data[2], send.message);
 					break;
+				default:
+					instance.broadcast(send.event, idx, data[2], "");
+					break;	
 			}
 		} catch (e) {
 			console.error(e);
@@ -97,11 +102,11 @@ websocket.on("connection", (socket, request) => {
 	});
 	socket.on("close", () => {
 		instance.delete(idx);
-		instance.broadcast(idx, data[2], `${data[2]}님께서 퇴장하셨습니다.`);
+		instance.broadcast(WSType.Close, idx, data[2], `${data[2]}님께서 퇴장하셨습니다.`);
 	});
 
 	instance.push([idx, data[2], socket]);
-	instance.broadcast(idx, data[2], `${data[2]}님께서 입장하셨습니다.`);
+	instance.broadcast(WSType.Open, idx, data[2], `${data[2]}님께서 입장하셨습니다.`);
 });
 websocket.on("listening", () => {
 	console.log("websocket listening 8444");
