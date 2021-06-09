@@ -79,10 +79,13 @@ websocket.on("connection", (socket, request) => {
 	if (pathname === "/") return;
 
 	const data = pathname.split(/\//g);
-	if (data.length < 3) return;
+	if (data.length < 4) return;
+	
+	const roomid = parseInt(data[1], 10);
+	const idx = parseInt(data[2], 10);
+	const name = data[3];
 
-	const idx = parseInt(data[1], 10);
-	if (isNaN(idx)) return;
+	if (isNaN(roomid) || isNaN(idx)) return;
 
 	socket.on("message", (msg) => {
 		console.log(`Received message ${msg} from user`);
@@ -90,10 +93,10 @@ websocket.on("connection", (socket, request) => {
 			let send: wsData = JSON.parse(msg.toString());
 			switch (send.event) {
 				case WSType.Message:
-					instance.broadcast(WSType.Message, idx, data[2], send.message);
+					instance.broadcast(WSType.Message, roomid, idx, name, send.message);
 					break;
 				default:
-					instance.broadcast(send.event, idx, data[2], "");
+					instance.broadcast(send.event, roomid, idx, name, "");
 					break;	
 			}
 		} catch (e) {
@@ -102,11 +105,11 @@ websocket.on("connection", (socket, request) => {
 	});
 	socket.on("close", () => {
 		instance.delete(idx);
-		instance.broadcast(WSType.Close, idx, data[2], `${data[2]}님께서 퇴장하셨습니다.`);
+		instance.broadcast(WSType.Close, roomid, idx, name, `${name}님께서 퇴장하셨습니다.`);
 	});
 
-	instance.push([idx, data[2], socket]);
-	instance.broadcast(WSType.Open, idx, data[2], `${data[2]}님께서 입장하셨습니다.`);
+	instance.push([roomid, idx, name, socket]);
+	instance.broadcast(WSType.Open, roomid, idx, name, `${name}님께서 입장하셨습니다.`);
 });
 websocket.on("listening", () => {
 	console.log("websocket listening 8444");

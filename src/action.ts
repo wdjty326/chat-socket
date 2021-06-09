@@ -36,11 +36,24 @@ export const getAction: http.RequestListener = (req, res) => {
 		res.end();
 	}
 	else if (pathname.startsWith("/chatlist")) {
-		res.write(JSON.stringify(wsSession.getInstance().getChats().map((data) => ({  type: data[0], idx: data[1], name: data[2], message: data[3] }))));
+		const { roomid } = params;
+
+		if (typeof roomid !== "string" || isNaN(parseInt(roomid.toString(), 10)))
+			throw new Error("Typeof Exception::roomid");
+
+		res.write(JSON.stringify(wsSession.getInstance()
+			.getChats(parseInt(roomid, 10)).map((data) => ({ type: data[0], idx: data[1], name: data[2], message: data[3] }))));
 		res.end();
 	}
 	else if (pathname.startsWith("/userlist")) {
-		res.write(JSON.stringify(wsSession.getInstance().get().map((data) => ({ idx: data[0], name: data[1] }))));
+		let { roomid } = params;
+
+		if (roomid) {
+			if (typeof roomid !== "string" || isNaN(parseInt(roomid.toString(), 10)))
+				throw new Error("Typeof Exception::roomid");
+			res.write(JSON.stringify(wsSession.getInstance().get(parseInt(roomid, 10)).map((data) => ({ idx: data[1], name: data[2] }))));
+		} else
+			res.write(JSON.stringify(wsSession.getInstance().get().map((data) => ({ idx: data[1], name: data[2] }))));
 		res.end();
 	}
 	else if (pathname.startsWith("/blocklist")) {
