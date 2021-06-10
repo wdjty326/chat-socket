@@ -35,19 +35,42 @@ var getAction = function (req, res) {
         }));
         res.end();
     }
-    else if (pathname.startsWith("/chatlist")) {
-        res.write(JSON.stringify(session_1.wsSession.getInstance().getChats().map(function (data) { return ({ type: data[0], idx: data[1], name: data[2], message: data[3] }); })));
-        res.end();
-    }
-    else if (pathname.startsWith("/userlist")) {
-        res.write(JSON.stringify(session_1.wsSession.getInstance().get().map(function (data) { return ({ idx: data[0], name: data[1] }); })));
-        res.end();
-    }
-    else if (pathname.startsWith("/blocklist")) {
+    else if (pathname.startsWith("/login")) {
         var idx_1 = params.idx;
         if (typeof idx_1 !== "string" || isNaN(parseInt(idx_1.toString(), 10)))
             throw new Error("Typeof Exception::idx");
-        db.select("block", function (data) { return data.idx === parseInt(idx_1.toString(), 10); })
+        var checked = session_1.wsSession.getInstance()
+            .get()
+            .findIndex(function (data) { return data[1] === parseInt(idx_1.toString(), 10); });
+        res.write(JSON.stringify({
+            login: checked !== -1,
+        }));
+        res.end();
+    }
+    else if (pathname.startsWith("/chatlist")) {
+        var roomid = params.roomid;
+        if (typeof roomid !== "string" || isNaN(parseInt(roomid.toString(), 10)))
+            throw new Error("Typeof Exception::roomid");
+        res.write(JSON.stringify(session_1.wsSession.getInstance()
+            .getChats(parseInt(roomid, 10)).map(function (data) { return ({ type: data[0], idx: data[1], name: data[2], message: data[3] }); })));
+        res.end();
+    }
+    else if (pathname.startsWith("/userlist")) {
+        var roomid = params.roomid;
+        if (roomid) {
+            if (typeof roomid !== "string" || isNaN(parseInt(roomid.toString(), 10)))
+                throw new Error("Typeof Exception::roomid");
+            res.write(JSON.stringify(session_1.wsSession.getInstance().get(parseInt(roomid, 10)).map(function (data) { return ({ idx: data[1], name: data[2] }); })));
+        }
+        else
+            res.write(JSON.stringify(session_1.wsSession.getInstance().get().map(function (data) { return ({ idx: data[1], name: data[2] }); })));
+        res.end();
+    }
+    else if (pathname.startsWith("/blocklist")) {
+        var idx_2 = params.idx;
+        if (typeof idx_2 !== "string" || isNaN(parseInt(idx_2.toString(), 10)))
+            throw new Error("Typeof Exception::idx");
+        db.select("block", function (data) { return data.idx === parseInt(idx_2.toString(), 10); })
             .then(function (datas) {
             res.write(JSON.stringify(datas));
             res.end();

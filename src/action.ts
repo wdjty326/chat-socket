@@ -35,6 +35,20 @@ export const getAction: http.RequestListener = (req, res) => {
 		}));
 		res.end();
 	}
+	else if (pathname.startsWith("/login")) {
+		const { idx } = params;
+
+		if (typeof idx !== "string" || isNaN(parseInt(idx.toString(), 10)))
+			throw new Error("Typeof Exception::idx");
+
+		const checked = wsSession.getInstance()
+			.get()
+			.findIndex((data) => data[1] === parseInt(idx.toString(), 10));
+		res.write(JSON.stringify({
+			login: checked !== -1,
+		}));
+		res.end();
+	}
 	else if (pathname.startsWith("/chatlist")) {
 		const { roomid } = params;
 

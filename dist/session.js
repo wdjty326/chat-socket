@@ -9,7 +9,7 @@ exports.wsSession = void 0;
 var const_1 = require("./const");
 var wsSession = /** @class */ (function () {
     function wsSession() {
-        this.chats = [];
+        this.chats = {};
         this.list = [];
     }
     wsSession.getInstance = function () {
@@ -25,17 +25,20 @@ var wsSession = /** @class */ (function () {
         if (idx > -1)
             this.list.splice(idx, 1);
     };
-    wsSession.prototype.get = function () {
-        return __spreadArray([], this.list);
+    wsSession.prototype.get = function (roomid) {
+        return typeof roomid === "undefined" ? __spreadArray([], this.list) : __spreadArray([], this.list).filter(function (session) { return session[0] === roomid; });
     };
-    wsSession.prototype.getChats = function () {
-        return __spreadArray([], this.chats);
+    wsSession.prototype.getChats = function (roomid) {
+        return __spreadArray([], this.chats[roomid]);
     };
-    wsSession.prototype.broadcast = function (type, idx, name, message) {
-        this.list.forEach(function (session) { return session[2].send(JSON.stringify({ type: type, idx: idx, name: name, message: message })); });
-        this.chats.push([type, idx, name, message]);
-        if (this.chats.length > const_1.MAXIMUM_CHAT_COUNT)
-            this.chats.splice(0, 1);
+    wsSession.prototype.broadcast = function (type, roomid, idx, name, message) {
+        this.list.filter(function (session) { return session[0] === roomid; })
+            .forEach(function (session) { return session[3].send(JSON.stringify({ type: type, idx: idx, name: name, message: message })); });
+        if (typeof this.chats[roomid] === "undefined")
+            this.chats[roomid] = [];
+        this.chats[roomid].push([type, idx, name, message]);
+        if (this.chats[roomid].length > const_1.MAXIMUM_CHAT_COUNT)
+            this.chats[roomid].splice(0, 1);
     };
     wsSession.instance = null;
     return wsSession;

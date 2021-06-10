@@ -71,10 +71,12 @@ websocket.on("connection", function (socket, request) {
     if (pathname === "/")
         return;
     var data = pathname.split(/\//g);
-    if (data.length < 3)
+    if (data.length < 4)
         return;
-    var idx = parseInt(data[1], 10);
-    if (isNaN(idx))
+    var roomid = parseInt(data[1], 10);
+    var idx = parseInt(data[2], 10);
+    var name = data[3];
+    if (isNaN(roomid) || isNaN(idx))
         return;
     socket.on("message", function (msg) {
         console.log("Received message " + msg + " from user");
@@ -82,10 +84,10 @@ websocket.on("connection", function (socket, request) {
             var send = JSON.parse(msg.toString());
             switch (send.event) {
                 case interface_1.WSType.Message:
-                    instance.broadcast(interface_1.WSType.Message, idx, data[2], send.message);
+                    instance.broadcast(interface_1.WSType.Message, roomid, idx, name, send.message);
                     break;
                 default:
-                    instance.broadcast(send.event, idx, data[2], "");
+                    instance.broadcast(send.event, roomid, idx, name, "");
                     break;
             }
         }
@@ -95,10 +97,10 @@ websocket.on("connection", function (socket, request) {
     });
     socket.on("close", function () {
         instance.delete(idx);
-        instance.broadcast(interface_1.WSType.Close, idx, data[2], data[2] + "\uB2D8\uAED8\uC11C \uD1F4\uC7A5\uD558\uC168\uC2B5\uB2C8\uB2E4.");
+        instance.broadcast(interface_1.WSType.Close, roomid, idx, name, name + "\uB2D8\uAED8\uC11C \uD1F4\uC7A5\uD558\uC168\uC2B5\uB2C8\uB2E4.");
     });
-    instance.push([idx, data[2], socket]);
-    instance.broadcast(interface_1.WSType.Open, idx, data[2], data[2] + "\uB2D8\uAED8\uC11C \uC785\uC7A5\uD558\uC168\uC2B5\uB2C8\uB2E4.");
+    instance.push([roomid, idx, name, socket]);
+    instance.broadcast(interface_1.WSType.Open, roomid, idx, name, name + "\uB2D8\uAED8\uC11C \uC785\uC7A5\uD558\uC168\uC2B5\uB2C8\uB2E4.");
 });
 websocket.on("listening", function () {
     console.log("websocket listening 8444");
