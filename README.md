@@ -47,6 +47,7 @@
 
 1. typescript
    + any 타입 사용금지
+   + inline interface 사용 금지
 
 <br>
 
@@ -85,9 +86,9 @@ const ws = new WebSocket("ws://localhost:8444/{roomid}/{idx}/{name}");
 | URI                                | Method | Parameter                  | Header              | return                                                       | Error |
 |------------------------------------|--------|----------------------------|---------------------|--------------------------------------------------------------|--------|
 | /login                             | GET    | idx: number                |                     | { login: true \| false }                                     | { error: string } |
-| /chatlist                          | GET    | roomid: number             |                     | [{type: string, idx: number, name: string, message: string}] | { error: string } |
-| /userlist                          | GET    | roomid?: number            |                     | [{idx: number, name: string}]                                | { error: string } |
-| /blocklist                         | GET    | idx: number                |                     | [{idx: number, target: number}]                              | { error: string } |
+| /chatlist                          | GET    | roomid: number             |                     | Array<{type: string, idx: number, name: string, message: string}> | { error: string } |
+| /userlist                          | GET    | roomid?: number            |                     | Array<{idx: number, name: string}>                                | { error: string } |
+| /blocklist                         | GET    | idx: number                |                     | Array<{idx: number, target: number}>                              | { error: string } |
 | /block                             | GET    | idx: number target: number |                     | {}                                                           | { error: string } |
 | /unlock                            | GET    | idx: number target: number |                     | {}                                                           | { error: string } |
 | /upload/(filename).(jpg\|png\|gif) | GET    |                            |                     |                                                              |  |
@@ -112,3 +113,4 @@ const ws = new WebSocket("ws://localhost:8444/{roomid}/{idx}/{name}");
 - 비공개 깃프로젝트 생성 후 프론트 담당자를 초대해주세요.
 - 퇴근전에는 반드시 금일 작업내용을 remote 에 올려주세요.
 - 최종완성본은 일정에 따라 코드리뷰가 진행될 예정입니다.
+- 기한은 기본 2주이며 최대 4주까지 연장됩니다. 기한연장이 필요할 시 담당자에게 과제만료 3일전에 보고해주세요.
