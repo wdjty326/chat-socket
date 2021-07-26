@@ -1,8 +1,10 @@
 "use strict";
-var __spreadArray = (this && this.__spreadArray) || function (to, from) {
-    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
-        to[j] = from[i];
-    return to;
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.wsSession = void 0;
@@ -21,15 +23,15 @@ var wsSession = /** @class */ (function () {
         this.list.push(data);
     };
     wsSession.prototype.delete = function (key) {
-        var idx = this.list.findIndex(function (v) { return v[0] === key; });
+        var idx = this.list.findIndex(function (v) { return v[1] === key; });
         if (idx > -1)
             this.list.splice(idx, 1);
     };
     wsSession.prototype.get = function (roomid) {
-        return typeof roomid === "undefined" ? __spreadArray([], this.list) : __spreadArray([], this.list).filter(function (session) { return session[0] === roomid; });
+        return typeof roomid === "undefined" ? __spreadArrays(this.list) : __spreadArrays(this.list).filter(function (session) { return session[0] === roomid; });
     };
     wsSession.prototype.getChats = function (roomid) {
-        return __spreadArray([], this.chats[roomid]);
+        return __spreadArrays(this.chats[roomid]);
     };
     wsSession.prototype.broadcast = function (type, roomid, idx, name, message) {
         this.list.filter(function (session) { return session[0] === roomid; })

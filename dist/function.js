@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.postParameter = exports.getParameter = void 0;
-var getParameter = function (search) {
+exports.getParameter = function (search) {
     var params = {};
     search
         .split("&")
@@ -18,8 +18,7 @@ var getParameter = function (search) {
     });
     return params;
 };
-exports.getParameter = getParameter;
-var postParameter = function (body, raw) {
+exports.postParameter = function (body, raw) {
     var params = {};
     var bodySplit = body.split(/\r\n/g);
     // const start = bodySplit[0];
@@ -89,4 +88,3 @@ var postParameter = function (body, raw) {
     });
     return params;
 };
-exports.postParameter = postParameter;

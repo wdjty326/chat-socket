@@ -11,7 +11,7 @@ var function_1 = require("./function");
 var const_1 = require("./const");
 var session_1 = require("./session");
 var db = nodb_1.default.getInstance();
-var getAction = function (req, res) {
+exports.getAction = function (req, res) {
     var pathname = req.url;
     var search = pathname.substr(pathname.indexOf("?") + 1);
     var params = function_1.getParameter(search);
@@ -120,8 +120,7 @@ var getAction = function (req, res) {
     }
     ;
 };
-exports.getAction = getAction;
-var postAction = function (req, res, raw) {
+exports.postAction = function (req, res, raw) {
     var pathname = req.url;
     var body = raw.toString();
     var contentType = req.headers["content-type"] || "";
@@ -149,4 +148,3 @@ var postAction = function (req, res, raw) {
     }
     ;
 };
-exports.postAction = postAction;

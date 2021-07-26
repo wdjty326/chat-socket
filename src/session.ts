@@ -21,7 +21,7 @@ export class wsSession {
 	}
 
 	public delete(key: number) {
-		const idx = this.list.findIndex((v) => v[0] === key);
+		const idx = this.list.findIndex((v) => v[1] === key);
 		if (idx > -1) this.list.splice(idx, 1);
 	}
 

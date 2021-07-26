@@ -1,6 +1,6 @@
 {
   "name": "chat-socket",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "교육용 소스",
   "main": "dist/index.js",
   "scripts": {
