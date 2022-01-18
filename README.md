@@ -85,7 +85,7 @@ const ws = new WebSocket("ws://localhost:8444/{roomid}/{idx}/{name}");
 
 | URI                                | Method | Parameter                  | Header              | return                                                       | Error |
 |------------------------------------|--------|----------------------------|---------------------|--------------------------------------------------------------|--------|
-| /login                             | GET    | idx: number                |                     | { login: true \| false }                                     | { error: string } |
+| /checked                             | GET    | idx: number                |                     | { checked: true \| false }                                     | { error: string } |
 | /chatlist                          | GET    | roomid: number             |                     | Array<{type: string, idx: number, name: string, message: string}> | { error: string } |
 | /userlist                          | GET    | roomid?: number            |                     | Array<{idx: number, name: string}>                                | { error: string } |
 | /blocklist                         | GET    | idx: number                |                     | Array<{idx: number, target: number}>                              | { error: string } |

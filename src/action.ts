@@ -35,7 +35,7 @@ export const getAction: http.RequestListener = (req, res) => {
 		}));
 		res.end();
 	}
-	else if (pathname.startsWith("/login")) {
+	else if (pathname.startsWith("/check")) {
 		const { idx } = params;
 
 		if (typeof idx !== "string" || isNaN(parseInt(idx.toString(), 10)))
@@ -45,7 +45,7 @@ export const getAction: http.RequestListener = (req, res) => {
 			.get()
 			.findIndex((data) => data[1] === parseInt(idx.toString(), 10));
 		res.write(JSON.stringify({
-			login: checked !== -1,
+			checked: checked !== -1,
 		}));
 		res.end();
 	}

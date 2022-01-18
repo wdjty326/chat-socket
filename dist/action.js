@@ -35,7 +35,7 @@ exports.getAction = function (req, res) {
         }));
         res.end();
     }
-    else if (pathname.startsWith("/login")) {
+    else if (pathname.startsWith("/check")) {
         var idx_1 = params.idx;
         if (typeof idx_1 !== "string" || isNaN(parseInt(idx_1.toString(), 10)))
             throw new Error("Typeof Exception::idx");
@@ -43,7 +43,7 @@ exports.getAction = function (req, res) {
             .get()
             .findIndex(function (data) { return data[1] === parseInt(idx_1.toString(), 10); });
         res.write(JSON.stringify({
-            login: checked !== -1,
+            checked: checked !== -1,
         }));
         res.end();
     }
